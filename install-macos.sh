@@ -92,28 +92,58 @@ install_ipfs_cluster_follow
 ipfs-cluster-follow synthetix init "http://127.0.0.1:8080/ipns/k51qzi5uqu5dmdzyb1begj16z2v5btbyzo1lnkdph0kn84o9gmc2uokpi4w54c"
 
 # Create plist file for ipfs-cluster-follow to autostart on login
+cat > ~/Library/LaunchAgents/ipfs-daemon.plist <<- EOM
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>Label</key>
+    <string>ipfs-daemon</string>
+    <key>ProgramArguments</key>
+    <array>
+      <string>/usr/local/bin/ipfs</string>
+      <string>daemon</string>
+      <string>--init</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardErrorPath</key>
+    <string>/tmp/ipfs-daemon.err</string>
+    <key>StandardOutPath</key>
+    <string>/tmp/ipfs-daemon.out</string>
+  </dict>
+</plist>
+EOM
+
+# Load and start ipfs-daemon service
+launchctl load -w ~/Library/LaunchAgents/ipfs-daemon.plist
+
+
+# Create plist file for ipfs-cluster-follow to autostart on login
 cat > ~/Library/LaunchAgents/ipfs-cluster-follow.plist <<- EOM
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-<dict>
-	<key>Label</key>
-	<string>ipfs-cluster-follow</string>
-	<key>ProgramArguments</key>
-	<array>
-		<string>/usr/local/bin/ipfs-cluster-follow</string>
-		<string>synthetix</string>
-		<string>run</string>
-	</array>
-	<key>RunAtLoad</key>
-	<true/>
-	<key>KeepAlive</key>
-	<true/>
-	<key>StandardErrorPath</key>
-	<string>/tmp/ipfs-cluster-follow.err</string>
-	<key>StandardOutPath</key>
-	<string>/tmp/ipfs-cluster-follow.out</string>
-</dict>
+  <dict>
+    <key>Label</key>
+    <string>ipfs-cluster-follow</string>
+    <key>ProgramArguments</key>
+    <array>
+      <string>/usr/local/bin/ipfs-cluster-follow</string>
+      <string>synthetix</string>
+      <string>run</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardErrorPath</key>
+    <string>/tmp/ipfs-cluster-follow.err</string>
+    <key>StandardOutPath</key>
+    <string>/tmp/ipfs-cluster-follow.out</string>
+  </dict>
 </plist>
 EOM
 
