@@ -77,7 +77,7 @@ install_ipfs
 ipfs init
 ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '["*"]'
 ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '["PUT", "POST", "GET"]'
-
+ipfs config profile apply lowpower
 
 # TODO: uncomment if needed, but we don't need this
 # Download and install IPFS Desktop App
