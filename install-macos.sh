@@ -14,85 +14,63 @@ else
 fi
 
 function install_ipfs() {
-  echo Install go-ipfs
+  echo "Checking for existing ipfs installation..."
 
-  echo Get the latest version
+  # Get the latest version
   VERSIONS_URL="https://dist.ipfs.tech/go-ipfs/versions"
-  LATEST_VERSION=$(curl -SL $VERSIONS_URL | tail -n 1)
-  echo LATEST_VERSION=$LATEST_VERSION
-  
-  echo Download the latest version
+  LATEST_VERSION=$(curl -sSL $VERSIONS_URL | tail -n 1)
+  LATEST_VERSION_NUMBER=${LATEST_VERSION#*v}
+
+  # Check if ipfs is already installed
+  if command -v ipfs &> /dev/null; then
+    INSTALLED_VERSION=$(ipfs --version | awk '{print $3}')
+
+    if [ "$INSTALLED_VERSION" == "$LATEST_VERSION_NUMBER" ]; then
+      echo "ipfs version $INSTALLED_VERSION is already installed."
+      return
+    else
+      echo "Updating ipfs from version $INSTALLED_VERSION to $LATEST_VERSION_NUMBER"
+    fi
+  else
+    echo "Installing ipfs version $LATEST_VERSION_NUMBER"
+  fi
+
+  # Download the latest version
   DOWNLOAD_URL="https://dist.ipfs.tech/go-ipfs/${LATEST_VERSION}/go-ipfs_${LATEST_VERSION}_darwin-${ARCH}.tar.gz"
-  echo DOWNLOAD_URL=$DOWNLOAD_URL
-  curl -SL -o ipfs.tar.gz $DOWNLOAD_URL
-  
+  echo "DOWNLOAD_URL=$DOWNLOAD_URL"
+  curl -sSL -o ipfs.tar.gz $DOWNLOAD_URL
+
   # Extract the binary
   tar -xzf ipfs.tar.gz
   rm ipfs.tar.gz
-  
+
   # Move the binary to /usr/local/bin or another directory in your $PATH
-  mv ipfs/ipfs /usr/local/bin/
-  rm -r ipfs
-  
+  mv ./go-ipfs/ipfs /usr/local/bin/
+  rm -r ./go-ipfs
+
   # Check if the installation was successful
   if ipfs --version | grep -q "ipfs version"; then
-    echo "$(ipfs --version) installed successfully."
+    echo "ipfs version $(ipfs --version | awk '{print $3}') installed successfully."
   else
     echo "Installation failed."
     exit 1
   fi
 }
 
+function configure_ipfs() {
+  echo "Configuring IPFS..."
 
-function install_ipfs_cluster_follow() {
-  # Get the latest version of ipfs-cluster-follow
-  VERSIONS_URL="https://dist.ipfs.tech/ipfs-cluster-follow/versions"
-  LATEST_VERSION=$(curl -sSL $VERSIONS_URL | tail -n 1)
-  
-  # Download the latest version
-  DOWNLOAD_URL="https://dist.ipfs.tech/ipfs-cluster-follow/${LATEST_VERSION}/ipfs-cluster-follow_${LATEST_VERSION}_darwin-${ARCH}.tar.gz"
-  curl -sSL -o ipfs-cluster-follow.tar.gz $DOWNLOAD_URL
-  
-  # Extract the binary
-  tar -xzf ipfs-cluster-follow.tar.gz
-  rm ipfs-cluster-follow.tar.gz
-  
-  # Move the binary to /usr/local/bin or another directory in your $PATH
-  mv ipfs-cluster-follow/ipfs-cluster-follow /usr/local/bin/
-  rm -r ipfs-cluster-follow
-  
-  # Check if the installation was successful
-  if ipfs-cluster-follow --version | grep -q "ipfs-cluster-follow version"; then
-    echo "$(ipfs-cluster-follow --version) installed successfully."
-  else
-    echo "Installation failed."
-    exit 1
-  fi
+  ipfs init
+  ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '["*"]' &> /dev/null;
+  ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '["PUT", "POST", "GET"]' &> /dev/null;
+  ipfs config profile apply lowpower &> /dev/null;
 }
 
+function install_ipfs_autoload() {
+  echo "Installing IPFS autoloader..."
 
-install_ipfs
-
-# Initialize and configure IPFS
-ipfs init
-ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '["*"]'
-ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '["PUT", "POST", "GET"]'
-ipfs config profile apply lowpower
-
-# TODO: uncomment if needed, but we don't need this
-# Download and install IPFS Desktop App
-#  curl -L https://github.com/ipfs-shipyard/ipfs-desktop/releases/latest/download/ipfs-desktop.dmg -o ipfs-desktop.dmg
-#  hdiutil attach ipfs-desktop.dmg
-#  cp -R /Volumes/IPFS\ Desktop/IPFS\ Desktop.app /Applications
-#  hdiutil detach /Volumes/IPFS\ Desktop
-
-install_ipfs_cluster_follow
-
-# Initialize ipfs-cluster-follow
-ipfs-cluster-follow synthetix init "http://127.0.0.1:8080/ipns/k51qzi5uqu5dmdzyb1begj16z2v5btbyzo1lnkdph0kn84o9gmc2uokpi4w54c"
-
-# Create plist file for ipfs-cluster-follow to autostart on login
-cat > ~/Library/LaunchAgents/ipfs-daemon.plist <<- EOM
+  # Create plist file for ipfs-daemon to autostart on login
+  cat > ~/Library/LaunchAgents/ipfs-daemon.plist <<- EOM
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -117,12 +95,77 @@ cat > ~/Library/LaunchAgents/ipfs-daemon.plist <<- EOM
 </plist>
 EOM
 
-# Load and start ipfs-daemon service
-launchctl load -w ~/Library/LaunchAgents/ipfs-daemon.plist
+  # Check if ipfs-daemon is already loaded
+  if launchctl list | grep -q "ipfs-daemon"; then
+    echo "Unloading existing ipfs-daemon service..."
+    launchctl unload ~/Library/LaunchAgents/ipfs-daemon.plist
+  fi
 
+  # Load and start ipfs-daemon service
+  echo "Loading ipfs-daemon service..."
+  launchctl load -w ~/Library/LaunchAgents/ipfs-daemon.plist
 
-# Create plist file for ipfs-cluster-follow to autostart on login
-cat > ~/Library/LaunchAgents/ipfs-cluster-follow.plist <<- EOM
+  echo "ipfs-daemon autoloader has been installed successfully."
+}
+
+function install_ipfs_cluster_follow() {
+  echo "Checking for existing ipfs-cluster-follow installation..."
+
+  # Get the latest version of ipfs-cluster-follow
+  VERSIONS_URL="https://dist.ipfs.tech/ipfs-cluster-follow/versions"
+  LATEST_VERSION=$(curl -sSL $VERSIONS_URL | tail -n 1)
+  LATEST_VERSION_NUMBER=${LATEST_VERSION#*v}
+
+  # Check if ipfs-cluster-follow is already installed
+  if command -v ipfs-cluster-follow &> /dev/null; then
+    INSTALLED_VERSION=$(ipfs-cluster-follow --version | awk '{print $3}')
+
+    if [ "$INSTALLED_VERSION" == "$LATEST_VERSION_NUMBER" ]; then
+      echo "ipfs-cluster-follow version $INSTALLED_VERSION is already installed."
+      return
+    else
+      echo "Updating ipfs-cluster-follow from version $INSTALLED_VERSION to $LATEST_VERSION_NUMBER"
+    fi
+  else
+    echo "Installing ipfs-cluster-follow version $LATEST_VERSION_NUMBER"
+  fi
+
+  # Download the latest version
+  DOWNLOAD_URL="https://dist.ipfs.tech/ipfs-cluster-follow/${LATEST_VERSION}/ipfs-cluster-follow_${LATEST_VERSION}_darwin-${ARCH}.tar.gz"
+  echo "DOWNLOAD_URL=$DOWNLOAD_URL"
+  curl -sSL -o ipfs-cluster-follow.tar.gz $DOWNLOAD_URL
+
+  # Extract the binary
+  tar -xzf ipfs-cluster-follow.tar.gz
+  rm ipfs-cluster-follow.tar.gz
+
+  # Move the binary to /usr/local/bin or another directory in your $PATH
+  mv ipfs-cluster-follow/ipfs-cluster-follow /usr/local/bin/
+  rm -r ipfs-cluster-follow
+
+  # Check if the installation was successful
+  if ipfs-cluster-follow --version | grep -q "ipfs-cluster-follow version"; then
+    echo "ipfs-cluster-follow version $(ipfs-cluster-follow --version | awk '{print $4}') installed successfully."
+  else
+    echo "Installation failed."
+    exit 1
+  fi
+}
+
+function configure_ipfs_cluster_follow() {
+  echo "Configuring ipfs-cluster-follow..."
+
+  # Initialize ipfs-cluster-follow
+  ipfs-cluster-follow synthetix init "http://127.0.0.1:8080/ipns/k51qzi5uqu5dmdzyb1begj16z2v5btbyzo1lnkdph0kn84o9gmc2uokpi4w54c"
+
+  echo "ipfs-cluster-follow has been configured successfully."
+}
+
+function install_ipfs_cluster_follow_autoload() {
+  echo "Installing ipfs-cluster-follow autoloader..."
+
+  # Create plist file for ipfs-cluster-follow to autostart on login
+  cat > ~/Library/LaunchAgents/ipfs-cluster-follow.plist <<- EOM
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -147,7 +190,26 @@ cat > ~/Library/LaunchAgents/ipfs-cluster-follow.plist <<- EOM
 </plist>
 EOM
 
-# Load and start ipfs-cluster-follow service
-launchctl load -w ~/Library/LaunchAgents/ipfs-cluster-follow.plist
+
+  # Check if ipfs-daemon is already loaded
+  if launchctl list | grep -q "ipfs-cluster-follow"; then
+    echo "Unloading existing ipfs-cluster-follow service..."
+    launchctl unload ~/Library/LaunchAgents/ipfs-cluster-follow.plist
+  fi
+
+  # Load and start ipfs-daemon service
+  echo "Loading ipfs-cluster-follow service..."
+  launchctl load -w ~/Library/LaunchAgents/ipfs-cluster-follow.plist
+
+  echo "ipfs-cluster-follow autoloader has been installed successfully."
+}
+
+install_ipfs
+configure_ipfs
+install_ipfs_autoload
+
+install_ipfs_cluster_follow
+configure_ipfs_cluster_follow
+install_ipfs_cluster_follow_autoload
 
 echo "IPFS and ipfs-cluster-follow have been installed and configured successfully."
