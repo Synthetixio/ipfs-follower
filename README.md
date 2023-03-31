@@ -31,3 +31,17 @@ docker build -t synthetix-ipfs docker
 ```sh
 docker run -d -p 8080:8080 -p 5001:5001 -p 9094:9094 synthetix-ipfs
 ```
+
+## Linux (Debian) automatic installation
+
+Save and execute script: [install-debian.sh](install-debian.sh)
+
+Or run it directly in your terminal:
+```sh
+curl https://synthetixio.github.io/ipfs-follower/install-debian.sh | bash
+```
+
+Script to uninstall `ipfs` and `ipfs-cluster-follow`: [uninstall-debian.sh](uninstall-debian.sh)
+```sh
+curl https://synthetixio.github.io/ipfs-follower/uninstall-debian.sh | bash
+```
