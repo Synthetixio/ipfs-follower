@@ -12,7 +12,7 @@ Anyone with a computer and an internet connection can join the swarm. It’s fin
 
 ## Installation
 
-The scripts below will install [IPFS](https://ipfs.tech/) and [IPFS Cluster](https://ipfscluster.io/). It will also configure them to run in the background when you start your computer, automatically pinning the files in the Synthetix Ecosystem IPFS Cluster.
+The scripts below will install [IPFS](https://ipfs.tech/) and [IPFS Cluster](https://ipfscluster.io/). The scripts will also configure IPFS to run in the background when you start your computer, automatically pinning the files in the Synthetix Ecosystem IPFS Cluster.
 
 ### MacOS
 
