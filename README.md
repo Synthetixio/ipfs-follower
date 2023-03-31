@@ -12,7 +12,7 @@ Anyone with a computer and an internet connection can join the swarm. It’s fin
 
 ## Installation
 
-The scripts below will install [IPFS](https://ipfs.tech/), [IPFS Cluster](https://ipfscluster.io/), and configure them to run in the background when you start your computer, automatically pinning the files in the Synthetix Ecosystem IPFS Cluster.
+The scripts below will install [IPFS](https://ipfs.tech/) and [IPFS Cluster](https://ipfscluster.io/). It will also configure them to run in the background when you start your computer, automatically pinning the files in the Synthetix Ecosystem IPFS Cluster.
 
 ### MacOS
 
@@ -21,9 +21,12 @@ Run this command to use the [install-macos.sh](install-macos.sh) script:
 curl https://synthetixio.github.io/ipfs-follower/install-macos.sh | bash
 ```
 
-If you would prefer to install manually, [follow these instructions](./install-macos.md).
+This can be uninstalled using [uninstall-macos.sh](uninstall-macos.sh):
+```sh
+curl https://synthetixio.github.io/ipfs-follower/uninstall-macos.sh | bash
+```
 
-This can be uninstalled using [uninstall-macos.sh](uninstall-macos.sh): `curl https://synthetixio.github.io/ipfs-follower/uninstall-macos.sh | bash`
+If you would prefer to install manually, [follow these instructions](./install-macos.md).
 
 ### Docker
 
@@ -41,7 +44,10 @@ Run this command to use the [install-debian.sh](install-debian.sh) script:
 curl https://synthetixio.github.io/ipfs-follower/install-debian.sh | bash
 ```
 
-This can be uninstalled using [uninstall-debian.sh](uninstall-debian.sh): `curl https://synthetixio.github.io/ipfs-follower/uninstall-debian.sh | bash`
+This can be uninstalled using [uninstall-debian.sh](uninstall-debian.sh):
+```sh
+curl https://synthetixio.github.io/ipfs-follower/uninstall-debian.sh | bash
+```
 
 ### Windows
 
