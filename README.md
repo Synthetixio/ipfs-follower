@@ -20,3 +20,14 @@ Script to uninstall `ipfs` and `ipfs-cluster-follow`: [uninstall-macos.sh](unins
 ```sh
 curl https://synthetixio.github.io/ipfs-follower/uninstall-macos.sh | bash
 ```
+
+
+## Building and running Docker container
+
+```sh
+docker build -t synthetix-ipfs docker
+```
+
+```sh
+docker run -d -p 8080:8080 -p 5001:5001 -p 9094:9094 synthetix-ipfs
+```
