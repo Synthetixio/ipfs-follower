@@ -71,21 +71,23 @@ function configure_ipfs() {
 function install_ipfs_autoload() {
   echo "Installing IPFS autoloader..."
 
+  CURRENT_USER=$(whoami)
+
   # Create systemd service file for ipfs-daemon
-  sudo bash -c 'cat > /etc/systemd/system/ipfs-daemon.service <<- EOM
+  sudo bash -c "cat > /etc/systemd/system/ipfs-daemon.service <<- EOM
 [Unit]
 Description=IPFS daemon
 After=network.target
 
 [Service]
-User=%i
+User=$CURRENT_USER
 ExecStart=/usr/local/bin/ipfs daemon --init
 Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
 EOM
-'
+"
 
   # Enable and start ipfs-daemon service
   sudo systemctl daemon-reload
@@ -152,21 +154,26 @@ function configure_ipfs_cluster_follow() {
 function install_ipfs_cluster_follow_autoload() {
   echo "Installing ipfs-cluster-follow autoloader..."
 
+  CURRENT_USER=$(whoami)
+
   # Create systemd service file for ipfs-cluster-follow
-  sudo bash -c 'cat > /etc/systemd/system/ipfs-cluster-follow.service <<- EOM
+  sudo bash -c "cat > /etc/systemd/system/ipfs-cluster-follow.service <<- EOM
 [Unit]
 Description=IPFS Cluster Follow daemon
-After=network.target
+Requires=ipfs-daemon.service
+After=network.target ipfs-daemon.service
 
 [Service]
-User=%i
+User=$CURRENT_USER
+Environment=IPFS_PATH=/home/$CURRENT_USER/.ipfs
+WorkingDirectory=/home/$CURRENT_USER
 ExecStart=/usr/local/bin/ipfs-cluster-follow synthetix run
 Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
 EOM
-'
+"
 
   # Enable and start ipfs-cluster-follow service
   sudo systemctl daemon-reload

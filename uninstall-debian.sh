@@ -3,9 +3,12 @@
 function uninstall_ipfs_autoload() {
   echo "Uninstalling IPFS autoload..."
 
+  # Stop the IPFS service
+  sudo systemctl stop ipfs-daemon
+
   # Disable and remove the IPFS service
-  sudo systemctl disable ipfs
-  sudo rm /etc/systemd/system/ipfs.service
+  sudo systemctl disable ipfs-daemon
+  sudo rm /etc/systemd/system/ipfs-daemon.service
 
   # Reload systemd configuration
   sudo systemctl daemon-reload
@@ -27,6 +30,9 @@ function uninstall_ipfs() {
 
 function uninstall_ipfs_cluster_follow_autoload() {
   echo "Uninstalling ipfs-cluster-follow autoload..."
+
+  # Stop the ipfs-cluster-follow service
+  sudo systemctl stop ipfs-cluster-follow
 
   # Disable and remove the ipfs-cluster-follow service
   sudo systemctl disable ipfs-cluster-follow
