@@ -156,7 +156,7 @@ function configure_ipfs_cluster_follow() {
   echo "Configuring ipfs-cluster-follow..."
 
   # Initialize ipfs-cluster-follow
-  ipfs-cluster-follow synthetix init "http://127.0.0.1:8080/ipns/k51qzi5uqu5dmdzyb1begj16z2v5btbyzo1lnkdph0kn84o9gmc2uokpi4w54c"
+  ipfs-cluster-follow synthetix init "http://127.0.0.1:8080/ipns/k51qzi5uqu5dj0vqsuc4wyyj93tpaurdfjtulpx0w45q8eqd7uay49zodimyh7"
 
   echo "ipfs-cluster-follow has been configured successfully."
 }
