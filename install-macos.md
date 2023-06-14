@@ -91,7 +91,7 @@
    1. Open `Terminal` (you can find it by searching in Spotlight).
    2. Paste the following command into the terminal and press Enter:
       ```sh
-      /usr/local/bin/ipfs-cluster-follow synthetix init "http://127.0.0.1:8080/ipns/k51qzi5uqu5dmdzyb1begj16z2v5btbyzo1lnkdph0kn84o9gmc2uokpi4w54c"
+      /usr/local/bin/ipfs-cluster-follow synthetix init "http://127.0.0.1:8080/ipns/k51qzi5uqu5dj0vqsuc4wyyj93tpaurdfjtulpx0w45q8eqd7uay49zodimyh7"
       ```
 
 ### 10. Set up IPFS Cluster Follow to autostart on login
